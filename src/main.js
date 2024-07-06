@@ -1,5 +1,5 @@
-// import getPicturesByQuery from './js/pixabay-api';
-// import { showImages, cardContainer } from './js/render-functions';
+import { getPicturesByQuery } from './js/pixabay-api';
+import { showImages } from './js/render-functions';
 
 // Описаний у документації
 import iziToast from 'izitoast';
@@ -11,120 +11,90 @@ import SimpleLightbox from 'simplelightbox';
 // Додатковий імпорт стилів
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const galleryLightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionPosition: 'bottom',
-  captionDelay: 250,
-});
+export const searchForm = document.querySelector('.form');
+export const formInput = document.querySelector('.form-input');
+export const loader = document.querySelector('.loader');
+export const gallery = document.querySelector('.gallery');
 
-const searchForm = document.querySelector('.form');
-const loader = document.querySelector('.loader');
-const cardContainer = document.querySelector('.gallery');
+loader.style.display = 'none';
 
 searchForm.addEventListener('submit', handlerSearch);
 
 function handlerSearch(event) {
   event.preventDefault();
 
-  const queryValue = searchForm.elements.query.value.toLowerCase();
+  const queryValue = formInput.value.toLowerCase().trim();
 
-  getPicturesByQuery(queryValue)
-    .then(data => {
-      if (data.hits.length === 0) {
-        iziToast.error({
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-          position: 'topRight',
-        });
-      } else {
-        showImages(data.hits);
-      }
-    })
-    .catch(error => {
-      console.error('Fetch error: ', error);
-      iziToast.error({
-        message: 'Failed to fetch images. Please try again later.',
-        position: 'topRight',
-      });
+  if (queryValue === '') {
+    iziToast.error({
+      message: 'Please complete the field!',
+      theme: 'dark',
+      progressBarColor: '#FFFFFF',
+      color: '#EF4040',
+      position: 'topRight',
     });
+    return;
+  } else {
+    showLoader();
+    getPicturesByQuery(queryValue)
+      .then(data => {
+        console.log(data);
+        if (!data.hits.length) {
+          iziToast.error({
+            position: 'topCenter',
+            backgroundColor: 'red',
+            title: 'Error',
+            message:
+              'Sorry, there are no images matching your search query. Please try again!',
+          });
+        }
+        gallery.innerHTML = '';
+        showImages(data.hits);
+        lightbox.refresh();
+      })
+      .catch(error => {
+        console.log(error);
+      })
+      .finally(() => {
+        offShowLoader();
+      });
+  }
 }
 
-const API_KEY = '44763661-907А9К415КАБ9Д29К7901К7КК';
-
-function getPicturesByQuery(q) {
-  return fetch(
-    `https://pixabay.com/api?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true`
-  ).then(res => {
-    //res - відповідь від серверу(обєкт типу Response)
-    console.log(res);
-
-    //перевірка помилки 404(щоб попасти в блок catch)
-    if (!res.ok) {
-      throw new Error(res.status); //викид помилки
-    }
-
-    //json() - викликається на обєкті відповіді від серверу та парсить відповідь в звичайний обєкт, повертає проміс
-    return res.json();
-  });
+export function showLoader() {
+  if (loader) {
+    loader.style.display = 'block';
+  }
 }
 
-function showImages(arr) {
-  const markup = arr
-    .map(
-      ({
-        webformatURL,
-        largeImageURL,
-        tags,
-        likes,
-        views,
-        comments,
-        downloads,
-      }) => {
-        return `<li class="gallery-item">
-        <a class="gallery-link href="${largeImageURL}" "> <img class="gallery-image src="${webformatURL}" alt="${tags}"/></a>
-        <ul class = "gallery">
-          <li>
-            <h3>likes</h3>
-            <p>${likes}</p>
-          </li>
-          <li>
-            <h3>views</h3>
-            <p>${views}</p>
-          </li>
-          <li>
-            <h3>comments</h3>
-            <p>${comments}</p>
-          </li>
-          <li>
-            <h3>downloads</h3>
-            <p>${downloads}</p>
-          </li>
-        </ul>
-      
-      </li>
-        `;
-      }
-    )
-    .join('');
-  cardContainer.innerHTML = markup;
+function offShowLoader() {
+  if (loader) {
+    loader.style.display = 'none';
+  }
 }
 
-cardContainer.addEventListener('click', handlerGetImages);
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: 250,
+});
 
-// function handlerGetImages(evt) {
-//   evt.preventDefault();
-//   if (evt.currentTarget === evt.target) {
-//     return;
-//   }
-//   const parent = evt.target.closest('.gallery-image');
-//   const currentOriginal = parent.dataset.source;
-//   const currentDescription = parent.dataset.description;
+gallery.addEventListener('click', handlerGetImages);
 
-//   const instance = basicLightbox.create(`
-//     <div class="modal">
-//       <img class="modal-img" src="${webformatURL}" alt="${tags}" width="1112" height="640">
-//     </div>
-//   `);
+function handlerGetImages(evt) {
+  evt.preventDefault();
+  if (evt.currentTarget === evt.target) {
+    return;
+  }
+  const parent = document.querySelector('.gallery-image');
+  const srcWebformatURL = parent.src;
+  const altTags = parent.alt;
 
-//   instance.show();
-// }
+  const instance = basicLightbox.create(`
+    <div class="modal">
+      <img class="modal-img" src="${srcWebformatURL}" alt="${altTags}" >
+    </div>
+  `);
+
+  instance.show();
+}
