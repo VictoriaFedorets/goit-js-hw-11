@@ -86,22 +86,22 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
-gallery.addEventListener('click', handlerGetImages);
+// gallery.addEventListener('click', handlerGetImages);
 
-function handlerGetImages(evt) {
-  evt.preventDefault();
-  if (evt.currentTarget === evt.target) {
-    return;
-  }
-  const parent = document.querySelector('.gallery-image');
-  const srcWebformatURL = parent.src;
-  const altTags = parent.alt;
+// function handlerGetImages(evt) {
+//   evt.preventDefault();
+//   if (evt.currentTarget === evt.target) {
+//     return;
+//   }
+//   const parent = document.querySelector('.gallery-image');
+//   const srcWebformatURL = parent.src;
+//   const altTags = parent.alt;
 
-  const instance = basicLightbox.create(`
-    <div class="modal">
-      <img class="modal-img" src="${srcWebformatURL}" alt="${altTags}" >
-    </div>
-  `);
+//   const instance = basicLightbox.create(`
+//     <div class="modal">
+//       <img class="modal-img" src="${srcWebformatURL}" alt="${altTags}" >
+//     </div>
+//   `);
 
-  instance.show();
-}
+//   instance.show();
+// }
