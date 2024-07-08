@@ -26,7 +26,7 @@ function handlerSearch(event) {
   const queryValue = formInput.value.toLowerCase().trim();
 
   if (queryValue === '') {
-    iziToast.error({
+    iziToast.warning({
       message: 'Please complete the field!',
       theme: 'dark',
       progressBarColor: '#FFFFFF',
@@ -34,31 +34,36 @@ function handlerSearch(event) {
       position: 'topRight',
     });
     return;
-  } else {
-    showLoader();
-    getPicturesByQuery(queryValue)
-      .then(data => {
-        console.log(data);
-        if (!data.hits.length) {
-          iziToast.error({
-            position: 'topCenter',
-            backgroundColor: 'red',
-            title: 'Error',
-            message:
-              'Sorry, there are no images matching your search query. Please try again!',
-          });
-        }
-        gallery.innerHTML = '';
-        showImages(data.hits);
-        lightbox.refresh();
-      })
-      .catch(error => {
-        console.log(error);
-      })
-      .finally(() => {
-        offShowLoader();
-      });
   }
+  showLoader();
+
+  getPicturesByQuery(queryValue)
+    .then(data => {
+      console.log(data);
+      if (!data.hits.length) {
+        iziToast.error({
+          position: 'topRight',
+          backgroundColor: 'red',
+          title: 'Error',
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+        });
+        return;
+      }
+      gallery.innerHTML = '';
+      showImages(data.hits);
+      lightbox.refresh();
+    })
+    .catch(error => {
+      console.log(error);
+      iziToast.error({
+        title: 'Error',
+        message: 'Something went wrong.',
+      });
+    })
+    .finally(() => {
+      offShowLoader();
+    });
 }
 
 export function showLoader() {
