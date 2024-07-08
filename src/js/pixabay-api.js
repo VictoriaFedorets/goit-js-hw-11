@@ -1,7 +1,6 @@
 import { formInput, showLoader } from '../main';
 
 export function getPicturesByQuery() {
-  showLoader();
   const query = formInput.value;
   console.log(query);
   const API_KEY = '44763661-907a9c415cab9d29c7901c7cc';

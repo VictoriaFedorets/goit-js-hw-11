@@ -26,7 +26,7 @@ function handlerSearch(event) {
   const queryValue = formInput.value.toLowerCase().trim();
 
   if (queryValue === '') {
-    iziToast.warning({
+    iziToast.error({
       message: 'Please complete the field!',
       theme: 'dark',
       progressBarColor: '#FFFFFF',
@@ -35,6 +35,7 @@ function handlerSearch(event) {
     });
     return;
   }
+  gallery.innerHTML = '';
   showLoader();
 
   getPicturesByQuery(queryValue)
@@ -43,6 +44,7 @@ function handlerSearch(event) {
       if (!data.hits.length) {
         iziToast.error({
           position: 'topRight',
+          maxWidth: '432px',
           backgroundColor: 'red',
           title: 'Error',
           message:
@@ -50,7 +52,7 @@ function handlerSearch(event) {
         });
         return;
       }
-      gallery.innerHTML = '';
+
       showImages(data.hits);
       lightbox.refresh();
     })
